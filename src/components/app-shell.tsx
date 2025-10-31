@@ -24,6 +24,7 @@ import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Button } from './ui/button';
 
 type AppShellProps = {
   children: ReactNode;

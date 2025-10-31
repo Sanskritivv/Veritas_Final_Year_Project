@@ -13,30 +13,25 @@ export function IrisScanner() {
 
   useEffect(() => {
     const timer1 = setTimeout(() => {
-      setStatus('Position your eye within the circle');
+      setStatus('Authenticating...');
       setScanning(true);
     }, 1500);
 
     const timer2 = setTimeout(() => {
-      setStatus('Scanning...');
-    }, 3000);
-
-    const timer3 = setTimeout(() => {
       setStatus('Authentication successful');
       setScanning(false);
       setCompleted(true);
-    }, 6000);
+    }, 4000);
     
-    const timer4 = setTimeout(() => {
+    const timer3 = setTimeout(() => {
       router.push('/dashboard');
-    }, 7000);
+    }, 5000);
 
 
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
-      clearTimeout(timer4);
     };
   }, [router]);
 
@@ -75,14 +70,13 @@ export function IrisScanner() {
             <div className="absolute inset-16 rounded-full bg-primary" />
           </div>
         </div>
-        {scanning && <div className="absolute top-0 left-1/2 h-full w-0.5 -translate-x-1/2 animate-scanner-line bg-gradient-to-b from-transparent via-accent to-transparent" />}
       </div>
       <p className="text-lg font-medium text-muted-foreground transition-colors duration-500 flex items-center gap-2">
         {completed ? (
             <span className="text-green-500">{status}</span>
         ) : (
             <>
-            {!scanning && <Loader className="animate-spin h-5 w-5" />}
+            {scanning && <Loader className="animate-spin h-5 w-5" />}
             {status}
             </>
         )}
@@ -98,24 +92,6 @@ export function IrisScanner() {
         }
         .animate-spin-slow {
           animation: spin-slow 10s linear infinite;
-        }
-        @keyframes scanner-line {
-          0% {
-            transform: rotate(0deg) translateY(-100px);
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            transform: rotate(360deg) translateY(-100px);
-            opacity: 0;
-          }
-        }
-        .animate-scanner-line {
-            height: 100px;
-            transform-origin: 50% 128px;
-            animation: scanner-line 3s linear infinite;
         }
       `}</style>
     </div>

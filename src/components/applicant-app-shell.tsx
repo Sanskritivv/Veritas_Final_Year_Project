@@ -72,16 +72,14 @@ export function AppShell({ children }: AppShellProps) {
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
+                <Link href={item.href} passHref>
                   <SidebarMenuButton
                     isActive={pathname === item.href}
                     tooltip={{ children: item.label }}
-                    asChild
+                    as="a"
                   >
-                    <a>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </a>
+                    <item.icon />
+                    <span>{item.label}</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
@@ -105,12 +103,10 @@ export function AppShell({ children }: AppShellProps) {
               <span className="text-xs text-muted-foreground">Applicant</span>
             </div>
           </div>
-            <Link href="/" legacyBehavior passHref>
-               <SidebarMenuButton tooltip={{children: "Logout"}} asChild>
-                    <a>
-                        <LogOut />
-                        <span>Logout</span>
-                    </a>
+            <Link href="/" passHref>
+               <SidebarMenuButton tooltip={{children: "Logout"}} as="a">
+                    <LogOut />
+                    <span>Logout</span>
                </SidebarMenuButton>
             </Link>
         </SidebarFooter>

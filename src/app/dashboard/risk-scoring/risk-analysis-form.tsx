@@ -1,5 +1,6 @@
 'use client';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -25,7 +26,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useEffect } from 'react';
 
 const formSchema = z.object({
   income: z.string().min(1, 'Income is required.'),
@@ -54,7 +54,7 @@ function SubmitButton({ isAnalysisDone }: { isAnalysisDone: boolean }) {
 }
 
 export default function RiskAnalysisForm({ onAnalysisComplete, onAnalysisError, setLoading, onReset, isAnalysisDone }: RiskAnalysisFormProps) {
-  const [state, formAction] = useFormState(generateCreditRiskScoreAction, {
+  const [state, formAction] = useActionState(generateCreditRiskScoreAction, {
     success: false,
   });
 

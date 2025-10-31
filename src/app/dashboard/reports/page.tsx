@@ -28,10 +28,19 @@ const pieChartData = [
     { status: 'Rejected', count: 25, fill: 'hsl(var(--destructive))' },
 ]
 
+const reasonsData = [
+  { reason: 'Low Credit Score', count: 15, fill: 'hsl(var(--destructive))' },
+  { reason: 'High DTI', count: 8, fill: 'hsl(var(--chart-5))' },
+  { reason: 'Auto-Approved', count: 28, fill: 'hsl(var(--chart-1))' },
+  { reason: 'Manual Approve', count: 17, fill: 'hsl(var(--chart-2))' },
+  { reason: 'Incomplete Docs', count: 12, fill: 'hsl(var(--chart-4))' },
+];
+
+
 export default function ReportsPage() {
   return (
     <div className="grid gap-6">
-       <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         <Card>
             <CardHeader>
                 <CardTitle>Applications by Month</CardTitle>
@@ -57,7 +66,7 @@ export default function ReportsPage() {
             <CardContent>
                  <ChartContainer config={{}} className="h-[300px] w-full">
                     <PieChart>
-                         <ChartTooltip content={<ChartTooltipContent nameKey="count" />} />
+                         <ChartTooltip content={<ChartTooltipContent nameKey="status" />} />
                         <Pie data={pieChartData} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={100} labelLine={false} label={({
                             cx,
                             cy,
@@ -65,7 +74,6 @@ export default function ReportsPage() {
                             innerRadius,
                             outerRadius,
                             percent,
-                            index,
                             }) => {
                             const RADIAN = Math.PI / 180
                             const radius = innerRadius + (outerRadius - innerRadius) * 0.5
@@ -87,6 +95,27 @@ export default function ReportsPage() {
             </CardContent>
         </Card>
        </div>
+       <Card>
+        <CardHeader>
+          <CardTitle>Approval & Rejection Reasons</CardTitle>
+          <CardDescription>Breakdown of decisions made on applications</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={{}} className="h-[300px] w-full">
+            <BarChart data={reasonsData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" />
+              <YAxis dataKey="reason" type="category" tickLine={false} axisLine={false} tickMargin={8} width={120} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="count" radius={4}>
+                {reasonsData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 }

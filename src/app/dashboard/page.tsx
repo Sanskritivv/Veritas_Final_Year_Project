@@ -1,3 +1,4 @@
+'use client';
 import {
   Card,
   CardContent,
@@ -18,6 +19,8 @@ import {
   CreditCard,
   DollarSign,
   Users,
+  Sparkles,
+  UserCheck,
 } from 'lucide-react';
 
 const applications = [
@@ -56,7 +59,7 @@ const applications = [
     status: 'Pending',
     date: '2023-10-02',
   },
-    {
+  {
     id: 'APP-006',
     name: 'Sarah Miller',
     amount: 120000,
@@ -65,7 +68,9 @@ const applications = [
   },
 ];
 
-const statusVariantMap: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
+const statusVariantMap: {
+  [key: string]: 'default' | 'secondary' | 'destructive';
+} = {
   Approved: 'default',
   Pending: 'secondary',
   Rejected: 'destructive',
@@ -74,8 +79,8 @@ const statusVariantMap: { [key: string]: 'default' | 'secondary' | 'destructive'
 export default function DashboardPage() {
   return (
     <div className="grid gap-6">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
+        <Card className="sm:col-span-1 xl:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Loan Value
@@ -83,13 +88,13 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="text-2xl font-bold">$177,500</div>
             <p className="text-xs text-muted-foreground">
               +20.1% from last month
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="sm:col-span-1 xl:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               New Applicants
@@ -103,22 +108,48 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="sm:col-span-1 xl:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Approval Rate</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">76%</div>
+            <div className="text-2xl font-bold">50%</div>
             <p className="text-xs text-muted-foreground">
-              +19% from last month
+              -5% from last month
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="sm:col-span-1 xl:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Review
+              Auto-Approved
+            </CardTitle>
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+16</div>
+            <p className="text-xs text-muted-foreground">
+              2 auto-approved this week
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="sm:col-span-1 xl:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Manual Review</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+5</div>
+            <p className="text-xs text-muted-foreground">
+              1 requires final sign-off
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="sm:col-span-1 xl:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Pending KYC
             </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -150,7 +181,9 @@ export default function DashboardPage() {
               {applications.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell className="font-medium">{app.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{app.id}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {app.id}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={statusVariantMap[app.status] || 'default'}>
                       {app.status}

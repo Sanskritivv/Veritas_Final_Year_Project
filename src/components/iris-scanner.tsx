@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Loader } from 'lucide-react';
 
-export function IrisScanner() {
+type IrisScannerProps = {
+  redirectTo?: string;
+};
+
+export function IrisScanner({ redirectTo = '/dashboard' }: IrisScannerProps) {
   const [status, setStatus] = useState('Initializing');
   const [scanning, setScanning] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -24,7 +28,7 @@ export function IrisScanner() {
     }, 4000);
     
     const timer3 = setTimeout(() => {
-      router.push('/dashboard');
+      router.push(redirectTo);
     }, 5000);
 
 
@@ -33,7 +37,7 @@ export function IrisScanner() {
       clearTimeout(timer2);
       clearTimeout(timer3);
     };
-  }, [router]);
+  }, [router, redirectTo]);
 
   return (
     <div className="flex flex-col items-center gap-6">

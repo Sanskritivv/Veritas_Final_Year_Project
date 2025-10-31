@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
-  ShieldCheck,
-  BarChart3,
+  FileText,
+  MessageSquare,
   Aperture,
   Settings,
   LogOut,
@@ -33,19 +33,19 @@ type AppShellProps = {
 
 const navItems = [
   {
-    href: '/dashboard',
+    href: '/applicant/dashboard',
     icon: LayoutDashboard,
-    label: 'Dashboard',
+    label: 'My Application',
   },
   {
-    href: '/dashboard/risk-scoring',
-    icon: ShieldCheck,
-    label: 'Risk Scoring',
+    href: '/applicant/documents',
+    icon: FileText,
+    label: 'Documents',
   },
   {
-    href: '/dashboard/reports',
-    icon: BarChart3,
-    label: 'Reports',
+    href: '/applicant/messages',
+    icon: MessageSquare,
+    label: 'Messages',
   },
 ];
 
@@ -59,7 +59,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar side="left" variant="sidebar" collapsible="icon">
         <SidebarHeader className="p-4">
           <Link
-            href="/dashboard"
+            href="/applicant/dashboard"
             className="flex items-center gap-2 text-primary-foreground group-data-[collapsible=icon]:justify-center"
           >
             <Aperture className="size-7 shrink-0 text-primary" />
@@ -97,15 +97,15 @@ export function AppShell({ children }: AppShellProps) {
                   alt={userAvatar.description}
                   data-ai-hint={userAvatar.imageHint}
                 />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>JS</AvatarFallback>
               </Avatar>
             )}
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="font-medium text-sm">Jane Doe</span>
-              <span className="text-xs text-muted-foreground">Analyst</span>
+              <span className="font-medium text-sm">John Smith</span>
+              <span className="text-xs text-muted-foreground">Applicant</span>
             </div>
           </div>
-           <Link href="/" legacyBehavior passHref>
+            <Link href="/" legacyBehavior passHref>
                <SidebarMenuButton tooltip={{children: "Logout"}} asChild>
                     <a>
                         <LogOut />
@@ -121,7 +121,7 @@ export function AppShell({ children }: AppShellProps) {
           <div className="flex-1">
             <h1 className="text-lg font-semibold">
               {navItems.find((item) => item.href === pathname)?.label ||
-                'Dashboard'}
+                'My Application'}
             </h1>
           </div>
           <Button variant="ghost" size="icon">

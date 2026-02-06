@@ -21,11 +21,32 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './ui/alert-dialog';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 type AppShellProps = {
   children: ReactNode;
@@ -53,6 +74,18 @@ const userAvatar = PlaceHolderImages.find((img) => img.id === 'user-avatar');
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const handleLogout = () => {
+    toast({
+      title: 'Logged out',
+      description: 'You have been successfully logged out.',
+    });
+    router.push('/');
+  };
 
   return (
     <SidebarProvider>
@@ -103,12 +136,28 @@ export function AppShell({ children }: AppShellProps) {
               <span className="text-xs text-muted-foreground">Analyst</span>
             </div>
           </div>
-           <Link href="/" passHref>
-               <SidebarMenuButton tooltip={{children: "Logout"}} as="a">
-                    <LogOut />
-                    <span>Logout</span>
-               </SidebarMenuButton>
-            </Link>
+          <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+            <AlertDialogTrigger asChild>
+              <SidebarMenuButton tooltip={{ children: "Logout" }}>
+                <LogOut />
+                <span>Logout</span>
+              </SidebarMenuButton>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to logout? You will need to sign in again to access the dashboard.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout}>
+                  Logout
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
@@ -120,10 +169,39 @@ export function AppShell({ children }: AppShellProps) {
                 'Dashboard'}
             </h1>
           </div>
-          <Button variant="ghost" size="icon">
-            <Settings className="size-5" />
-            <span className="sr-only">Settings</span>
-          </Button>
+          <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Settings className="size-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Settings</DialogTitle>
+                <DialogDescription>
+                  Manage your account settings and preferences.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <p className="text-sm font-medium mb-2">Profile</p>
+                  <p className="text-sm text-muted-foreground">
+                    Name: Jane Doe
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Role: Analyst
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Email notifications are enabled
+                  </p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </SidebarInset>

@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,6 +16,13 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Activity,
   CreditCard,
   DollarSign,
@@ -22,6 +30,7 @@ import {
   Sparkles,
   UserCheck,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const applications = [
   {
@@ -77,6 +86,17 @@ const statusVariantMap: {
 };
 
 export default function DashboardPage() {
+  const [selectedApp, setSelectedApp] = useState<typeof applications[0] | null>(null);
+  const { toast } = useToast();
+
+  const handleRowClick = (app: typeof applications[0]) => {
+    setSelectedApp(app);
+    toast({
+      title: 'Application details',
+      description: `Viewing details for ${app.name}'s application.`,
+    });
+  };
+
   return (
     <div className="grid gap-6">
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
@@ -179,7 +199,11 @@ export default function DashboardPage() {
             </TableHeader>
             <TableBody>
               {applications.map((app) => (
-                <TableRow key={app.id}>
+                <TableRow
+                  key={app.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleRowClick(app)}
+                >
                   <TableCell className="font-medium">{app.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {app.id}
@@ -199,6 +223,41 @@ export default function DashboardPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Application Details</DialogTitle>
+            <DialogDescription>
+              View details for {selectedApp?.name}'s loan application.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedApp && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">Application ID</p>
+                <p className="text-sm text-muted-foreground">{selectedApp.id}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Status</p>
+                <Badge variant={statusVariantMap[selectedApp.status] || 'default'}>
+                  {selectedApp.status}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Loan Amount</p>
+                <p className="text-sm text-muted-foreground">
+                  ${selectedApp.amount.toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Application Date</p>
+                <p className="text-sm text-muted-foreground">{selectedApp.date}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

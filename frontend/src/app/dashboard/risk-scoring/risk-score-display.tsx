@@ -32,44 +32,59 @@ type AnalysisResult = {
 };
 
 type FormInputData = {
-    creditScore: number;
-    income: number;
-    debt: number;
-    loanAmount: number;
-    loanDuration: number;
-}
+  creditScore: number;
+  income: number;
+  debt: number;
+  loanAmount: number;
+  loanDuration: number;
+};
 
 type RiskScoreDisplayProps = {
   result: AnalysisResult;
   inputData: FormInputData;
 };
 
+const RISK_SCORE_THRESHOLDS = {
+  lowRisk: 75,
+  mediumRisk: 50,
+} as const;
+
+function getScoreColor(score: number): string {
+  if (score > RISK_SCORE_THRESHOLDS.lowRisk) {
+    return 'hsl(var(--primary))';
+  }
+  if (score > RISK_SCORE_THRESHOLDS.mediumRisk) {
+    return 'hsl(43 74% 66%)';
+  }
+  return 'hsl(var(--destructive))';
+}
+
 export default function RiskScoreDisplay({ result, inputData }: RiskScoreDisplayProps) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const scoreColor =
-    result.creditRiskScore > 75
-      ? 'hsl(var(--primary))'
-      : result.creditRiskScore > 50
-      ? 'hsl(43 74% 66%)'
-      : 'hsl(var(--destructive))';
+  const scoreColor = getScoreColor(result.creditRiskScore);
 
   const chartData = [
     { name: 'score', value: result.creditRiskScore, fill: scoreColor },
   ];
 
   const handleGetExplanation = async () => {
-    setIsLoadingExplanation(true);
-    setError(null);
-    const response = await provideRiskFactorExplanationsAction(inputData);
-    if(response.success && response.explanation) {
+    try {
+      setIsLoadingExplanation(true);
+      setError(null);
+      const response = await provideRiskFactorExplanationsAction(inputData);
+      if (response.success && response.explanation) {
         setExplanation(response.explanation);
-    } else {
-        setError(response.error || "Failed to load explanation.");
+      } else {
+        setError(response.error || 'Failed to load explanation.');
+      }
+    } catch {
+      setError('Something went wrong while loading the explanation.');
+    } finally {
+      setIsLoadingExplanation(false);
     }
-    setIsLoadingExplanation(false);
   };
 
   return (
@@ -161,8 +176,12 @@ export default function RiskScoreDisplay({ result, inputData }: RiskScoreDisplay
                     <p className="text-muted-foreground">
                       Click the button to get a detailed, AI-powered explanation of the factors contributing to this risk score.
                     </p>
-                    <Button onClick={handleGetExplanation}>
-                      Explain Risk Factors
+                    <Button
+                      onClick={handleGetExplanation}
+                      disabled={isLoadingExplanation}
+                      aria-busy={isLoadingExplanation}
+                    >
+                      {isLoadingExplanation ? 'Generating...' : 'Explain Risk Factors'}
                     </Button>
                   </>
                 )}

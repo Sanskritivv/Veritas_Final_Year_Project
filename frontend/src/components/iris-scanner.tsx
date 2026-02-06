@@ -9,8 +9,14 @@ type IrisScannerProps = {
   redirectTo?: string;
 };
 
+type IrisStatus = 'Initializing' | 'Authenticating...' | 'Authentication successful';
+
+const IRIS_INIT_DELAY_MS = 1000;
+const IRIS_AUTH_COMPLETE_MS = 2500;
+const IRIS_REDIRECT_DELAY_MS = 2000;
+
 export function IrisScanner({ redirectTo = '/dashboard' }: IrisScannerProps) {
-  const [status, setStatus] = useState('Initializing');
+  const [status, setStatus] = useState<IrisStatus>('Initializing');
   const [scanning, setScanning] = useState(false);
   const [completed, setCompleted] = useState(false);
   const router = useRouter();
@@ -19,18 +25,17 @@ export function IrisScanner({ redirectTo = '/dashboard' }: IrisScannerProps) {
     const timer1 = setTimeout(() => {
       setStatus('Authenticating...');
       setScanning(true);
-    }, 1500);
+    }, IRIS_INIT_DELAY_MS);
 
     const timer2 = setTimeout(() => {
       setStatus('Authentication successful');
       setScanning(false);
       setCompleted(true);
-    }, 4000);
-    
+    }, IRIS_AUTH_COMPLETE_MS);
+
     const timer3 = setTimeout(() => {
       router.push(redirectTo);
-    }, 5000);
-
+    }, IRIS_REDIRECT_DELAY_MS);
 
     return () => {
       clearTimeout(timer1);
@@ -52,7 +57,7 @@ export function IrisScanner({ redirectTo = '/dashboard' }: IrisScannerProps) {
         <div
           className={cn(
             'absolute inset-4 rounded-full border-2 border-primary/50 transition-all duration-500',
-             completed ? 'border-green-500/50' : 'border-primary/50'
+            completed ? 'border-green-500/50' : 'border-primary/50'
           )}
         />
         <div
@@ -65,8 +70,8 @@ export function IrisScanner({ redirectTo = '/dashboard' }: IrisScannerProps) {
             <div
               className={cn(
                 'absolute inset-0 rounded-full bg-primary/10 transition-all duration-500',
-                 scanning && 'animate-pulse',
-                 completed ? 'bg-green-500/10' : 'bg-primary/10'
+                scanning && 'animate-pulse',
+                completed ? 'bg-green-500/10' : 'bg-primary/10'
               )}
             />
             <div className="absolute inset-8 rounded-full bg-primary/20" />
@@ -77,15 +82,15 @@ export function IrisScanner({ redirectTo = '/dashboard' }: IrisScannerProps) {
       </div>
       <p className="text-lg font-medium text-muted-foreground transition-colors duration-500 flex items-center gap-2">
         {completed ? (
-            <span className="text-green-500">{status}</span>
+          <span className="text-green-500">{status}</span>
         ) : (
-            <>
+          <>
             {scanning && <Loader className="animate-spin h-5 w-5" />}
             {status}
-            </>
+          </>
         )}
       </p>
-       <style jsx>{`
+      <style jsx>{`
         @keyframes spin-slow {
           from {
             transform: rotate(0deg);

@@ -30,26 +30,30 @@
             },
         }
     </script>
-    <style type="text/tailwindcss">
+    <style>
         @keyframes scan {
             0% { transform: translateY(-100%); opacity: 0; }
             50% { opacity: 1; }
             100% { transform: translateY(400%); opacity: 0; }
         }
         .scan-line {
-            animation: scan 3s ease-in-out infinite;
+            animation: scan 2.5s ease-in-out infinite;
         }
-        .kiosk-overlay {
-            background: radial-gradient(circle at center, transparent 30%, rgba(10, 12, 16, 0.4) 100%);
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.15); opacity: 0; }
+        }
+        .pulse-ring {
+            animation: pulse-ring 1.5s ease-out infinite;
         }
     </style>
-    <title>Veritas Client Portal - Biometric Verification</title>
+    <title>Veritas Client Portal - Iris Biometric Verification</title>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100 overflow-hidden">
     <div class="relative flex h-screen w-full overflow-hidden">
-        <aside
-            class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
@@ -61,23 +65,19 @@
                     </div>
                 </div>
                 <nav class="flex flex-col gap-2">
-                    <div
-                        class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+                    <div class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
                         <span class="material-symbols-outlined">dashboard</span>
                         <span class="text-sm font-medium">Dashboard</span>
                     </div>
                     <div class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary rounded-lg cursor-pointer">
-                        <span class="material-symbols-outlined"
-                            style="font-variation-settings: 'FILL' 1">description</span>
-                        <span class="text-sm font-semibold">Applications</span>
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">visibility</span>
+                        <span class="text-sm font-semibold">Iris Verification</span>
                     </div>
-                    <div
-                        class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+                    <div class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
                         <span class="material-symbols-outlined">folder</span>
                         <span class="text-sm font-medium">Documents</span>
                     </div>
-                    <div
-                        class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+                    <div class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
                         <span class="material-symbols-outlined">settings</span>
                         <span class="text-sm font-medium">Settings</span>
                     </div>
@@ -86,138 +86,472 @@
             <div class="mt-auto p-6 border-t border-slate-200 dark:border-slate-800">
                 <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-semibold text-slate-500">Step 2 of 4</span>
-                        <span class="text-xs font-bold text-primary">50%</span>
+                        <span class="text-xs font-semibold text-slate-500" id="sidebar-step">Step 2 of 4</span>
+                        <span class="text-xs font-bold text-primary" id="sidebar-pct">50%</span>
                     </div>
                     <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-primary h-full w-1/2 rounded-full"></div>
+                        <div class="bg-primary h-full rounded-full transition-all duration-500" id="sidebar-bar" style="width:50%"></div>
                     </div>
-                    <p class="text-[11px] text-slate-500 mt-2">Iris Recognition</p>
+                    <p class="text-[11px] text-slate-500 mt-2" id="sidebar-label">Iris Recognition</p>
                 </div>
             </div>
         </aside>
+
+        <!-- Main content -->
         <main class="flex-1 relative flex flex-col bg-slate-50 dark:bg-[#0a0c10]">
+            <!-- Header -->
             <header class="h-16 px-8 flex items-center justify-between z-10 absolute top-0 left-0 right-0">
                 <div class="flex items-center gap-2 text-slate-400 text-xs font-bold tracking-widest uppercase">
                     <span class="text-primary">SECURE ACCESS</span>
-                    <span class="mx-2">•</span>
+                    <span class="mx-2">&bull;</span>
                     <span>BIOMETRIC TERMINAL</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div
-                        class="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-white/5 backdrop-blur rounded-full border border-slate-200 dark:border-white/10">
-                        <span class="size-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span
-                            class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">System
-                            Online</span>
+                    <div class="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-white/5 backdrop-blur rounded-full border border-slate-200 dark:border-white/10">
+                        <span class="size-2 rounded-full" id="system-dot"></span>
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter" id="system-status">Loading...</span>
                     </div>
                 </div>
             </header>
-            <div class="flex-1 flex flex-col items-center justify-center relative p-12">
-                <div class="absolute top-24 z-20 text-center animate-fade-in pointer-events-none">
-                    <h2 class="text-xs font-black uppercase tracking-[0.3em] text-primary/80 mb-2">Iris Recognition
-                        Protocol</h2>
-                    <div class="group relative inline-block">
-                        <button class="text-slate-400 hover:text-primary transition-colors flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">info</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Requirements</span>
-                        </button>
-                        <div
-                            class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-30">
-                            <p class="text-[11px] text-slate-500 leading-relaxed">Ensure you are in a well-lit
-                                environment. Remove eyewear for the most accurate scan.</p>
-                        </div>
+
+            <!-- Central iris scanner area -->
+            <div class="flex-1 flex flex-col items-center justify-center relative p-8">
+                <!-- Title -->
+                <div class="absolute top-20 z-20 text-center pointer-events-none">
+                    <h2 class="text-xs font-black uppercase tracking-[0.3em] text-primary/80 mb-2">Iris Recognition Protocol</h2>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm text-slate-400">info</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400" id="mode-label">Loading...</span>
                     </div>
                 </div>
-                <div class="relative flex flex-col items-center w-full max-w-2xl kiosk-overlay rounded-[4rem] p-12">
-                    <div class="w-72 h-1 bg-slate-200 dark:bg-slate-800 rounded-full mb-12 overflow-hidden relative">
-                        <div
-                            class="absolute inset-0 bg-primary w-2/3 rounded-full shadow-[0_0_10px_rgba(25,85,230,0.5)]">
-                        </div>
+
+                <!-- Scanner viewport -->
+                <div class="relative flex flex-col items-center w-full max-w-2xl rounded-[3rem] p-8">
+                    <!-- Progress bar -->
+                    <div class="w-72 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mb-8 overflow-hidden relative">
+                        <div class="absolute inset-0 bg-primary rounded-full transition-all duration-300" id="top-progress" style="width:0%"></div>
                     </div>
-                    <div class="relative size-[32rem] max-h-[60vh] flex items-center justify-center">
-                        <div class="absolute inset-0 border-[1px] border-primary/20 rounded-full"></div>
-                        <div class="absolute inset-8 border-[1px] border-primary/10 rounded-full"></div>
-                        <div class="absolute inset-0 border-t-4 border-l-4 border-primary rounded-tl-[8rem] w-12 h-12">
-                        </div>
-                        <div
-                            class="absolute inset-0 border-t-4 border-r-4 border-primary rounded-tr-[8rem] w-12 h-12 ml-auto">
-                        </div>
-                        <div
-                            class="absolute inset-0 border-b-4 border-l-4 border-primary rounded-bl-[8rem] w-12 h-12 mt-auto">
-                        </div>
-                        <div
-                            class="absolute inset-0 border-b-4 border-r-4 border-primary rounded-br-[8rem] w-12 h-12 mt-auto ml-auto">
-                        </div>
-                        <div
-                            class="size-[28rem] rounded-full overflow-hidden border-8 border-white dark:border-slate-900 shadow-[0_0_80px_rgba(25,85,230,0.15)] bg-slate-200 dark:bg-slate-800 relative group">
-                            <img alt="High detailed eye iris scan" class="object-cover size-full opacity-90 scale-110"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwFKTLtWLfn6Sw9WmUqkhNtFjvljN_MzvIoJ1SYOiXnugEEMhUUX_QVHZkb36S6cz1QDHTIXE1dC8UlnIWfolIMoUzgzmtMGrbcyZyuJY-WcV6b9jkr8831Eo9SpZGBH6QfVq0fnwYfMoCxWKIgMySzTDi4a8oIR2Svxdz87IZX2fhJG3nbsH6cbNHJQqQ_7OpYakIayXKwu80jssQgVdZLEKRdJVvhzhTxlP-Qby7dE-KOTgmZ0gLaiTAqfDG3d-wXLqmEW-GEzk" />
-                            <div
-                                class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/50 to-transparent h-24 w-full -top-24 scan-line z-10">
+
+                    <!-- Camera container -->
+                    <div class="relative flex items-center justify-center" style="width: 420px; height: 420px;">
+                        <!-- Decorative rings -->
+                        <div class="absolute inset-0 border border-primary/20 rounded-full"></div>
+                        <div class="absolute inset-6 border border-primary/10 rounded-full"></div>
+
+                        <!-- Corner brackets -->
+                        <div class="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-primary rounded-tl-[6rem]"></div>
+                        <div class="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-primary rounded-tr-[6rem]"></div>
+                        <div class="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-primary rounded-bl-[6rem]"></div>
+                        <div class="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-primary rounded-br-[6rem]"></div>
+
+                        <!-- Video + Canvas circle -->
+                        <div class="size-[340px] rounded-full overflow-hidden border-8 border-white dark:border-slate-900 shadow-[0_0_80px_rgba(25,85,230,0.15)] bg-slate-900 relative" id="camera-container">
+                            <video id="video" class="object-cover size-full opacity-0 transition-opacity duration-500" style="transform: scaleX(-1);" playsinline muted></video>
+                            <canvas id="canvas" class="absolute inset-0 size-full object-cover" style="transform: scaleX(-1);"></canvas>
+                            <!-- Scan line -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent h-20 w-full -top-20 z-10" id="scan-line" style="display:none;"></div>
+                            <!-- Crosshairs -->
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="size-48 border border-white/20 rounded-full"></div>
+                                <div class="absolute size-px h-full bg-white/10"></div>
+                                <div class="absolute w-full h-px bg-white/10"></div>
                             </div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="size-64 border-[1px] border-white/20 rounded-full"></div>
-                                <div
-                                    class="size-48 border-[1px] border-white/40 border-dashed rounded-full animate-[spin_20s_linear_infinite]">
-                                </div>
-                                <div class="absolute size-4 w-px bg-white/80 top-1/2 -translate-y-1/2 left-0"></div>
-                                <div class="absolute size-4 w-px bg-white/80 top-1/2 -translate-y-1/2 right-0"></div>
-                                <div class="absolute size-px h-4 bg-white/80 left-1/2 -translate-x-1/2 top-0"></div>
-                                <div class="absolute size-px h-4 bg-white/80 left-1/2 -translate-x-1/2 bottom-0"></div>
+                            <!-- Loading overlay -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 z-20 transition-opacity duration-500" id="loading-overlay">
+                                <div class="size-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+                                <p class="text-white/70 text-sm font-medium" id="loading-text">Loading iris detection model...</p>
+                            </div>
+                            <!-- Success overlay -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-emerald-950/60 z-20 opacity-0 pointer-events-none transition-opacity duration-500" id="success-overlay">
+                                <span class="material-symbols-outlined text-emerald-400 mb-2" style="font-size:64px; font-variation-settings: 'FILL' 1;">check_circle</span>
+                                <p class="text-emerald-300 text-sm font-bold" id="success-text">Verified</p>
+                            </div>
+                            <!-- Failure overlay -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-red-950/50 z-20 opacity-0 pointer-events-none transition-opacity duration-500" id="failure-overlay">
+                                <span class="material-symbols-outlined text-red-400 mb-2" style="font-size:64px;">error</span>
+                                <p class="text-red-300 text-sm font-bold" id="failure-text">Verification Failed</p>
                             </div>
                         </div>
+
+                        <!-- Pulse ring -->
+                        <div class="absolute size-[360px] border-2 border-primary/40 rounded-full pulse-ring pointer-events-none transition-opacity" id="pulse-ring" style="opacity:0;"></div>
                     </div>
-                    <div class="mt-12 text-center">
-                        <div class="inline-flex items-center gap-2 mb-4">
-                            <span
-                                class="text-[10px] font-black tracking-[0.4em] text-primary uppercase bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20">
-                                Status: Active Scan
+
+                    <!-- Status area -->
+                    <div class="mt-8 text-center">
+                        <div class="flex items-center justify-center gap-2 mb-3">
+                            <span class="size-2 rounded-full bg-amber-500 animate-pulse" id="face-dot"></span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400" id="face-status">Waiting for camera...</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 mb-3">
+                            <span class="text-[10px] font-black tracking-[0.4em] uppercase px-4 py-1.5 rounded-full border border-slate-300 text-slate-400" id="status-badge">
+                                Initializing
                             </span>
                         </div>
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                            Position eyes within the frame
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight" id="main-instruction">
+                            Loading iris detection system...
                         </h3>
                     </div>
                 </div>
             </div>
-            <footer class="p-8 flex justify-between items-center z-10">
-                <button
-                    class="px-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+
+            <!-- Footer -->
+            <footer class="p-6 flex justify-between items-center z-10">
+                <button class="px-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" onclick="window.location.href='cilent_dashboard.html'">
                     Cancel Session
                 </button>
-                <div class="flex items-center gap-8">
-                    <div class="flex gap-4 items-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Auth Level 2</span>
-                        <div class="flex gap-1">
-                            <div class="size-1 rounded-full bg-primary"></div>
-                            <div class="size-1 rounded-full bg-primary"></div>
-                            <div class="size-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-                            <div class="size-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-                        </div>
-                    </div>
-                    <button
-                        class="px-12 py-4 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-full shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all">
-                        Continue to Verify
+                <div class="flex items-center gap-6">
+                    <button class="px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-primary border border-slate-200 dark:border-slate-700 rounded-full transition-colors hidden" id="btn-switch" onclick="switchMode()">
+                        Switch Mode
+                    </button>
+                    <button class="px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-red-400 hover:text-red-600 border border-red-200 dark:border-red-900 rounded-full transition-colors hidden" id="btn-clear" onclick="clearTemplate()">
+                        Clear Iris Data
+                    </button>
+                    <button class="px-10 py-3.5 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-full shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none" id="btn-action" disabled onclick="handleAction()">
+                        Initializing...
                     </button>
                 </div>
             </footer>
-            <div class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-                <div
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,transparent_0%,rgba(25,85,230,0.02)_100%)]">
-                </div>
-                <div class="absolute top-10 right-10 flex flex-col gap-1 items-end opacity-20">
-                    <div class="w-16 h-0.5 bg-primary"></div>
-                    <div class="w-8 h-0.5 bg-primary"></div>
-                </div>
-                <div class="absolute bottom-10 left-10 flex flex-col gap-1 items-start opacity-20">
-                    <div class="w-8 h-0.5 bg-primary"></div>
-                    <div class="w-16 h-0.5 bg-primary"></div>
-                </div>
-            </div>
         </main>
     </div>
 
+    <script type="module">
+        import { FaceLandmarker, FilesetResolver } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs';
+
+        // ─── Constants ───────────────────────────────────────
+        const IRIS_KEY = 'veritas_iris_template';
+        const REQUIRED_FRAMES = 20;
+        const MATCH_THRESHOLD = 0.82;
+
+        const L_IRIS_C = 468, L_IRIS = [469, 470, 471, 472];
+        const R_IRIS_C = 473, R_IRIS = [474, 475, 476, 477];
+        const L_EYE = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246];
+        const R_EYE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398];
+        const FW = [234, 454], LEC = [33, 133], REC = [362, 263];
+
+        // ─── DOM ─────────────────────────────────────────────
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+        const successOverlay = document.getElementById('success-overlay');
+        const successText = document.getElementById('success-text');
+        const failureOverlay = document.getElementById('failure-overlay');
+        const failureText = document.getElementById('failure-text');
+        const scanLineEl = document.getElementById('scan-line');
+        const pulseRing = document.getElementById('pulse-ring');
+        const btnAction = document.getElementById('btn-action');
+        const btnSwitch = document.getElementById('btn-switch');
+        const btnClear = document.getElementById('btn-clear');
+        const systemDot = document.getElementById('system-dot');
+        const systemStatus = document.getElementById('system-status');
+        const faceDot = document.getElementById('face-dot');
+        const faceStatus = document.getElementById('face-status');
+        const statusBadge = document.getElementById('status-badge');
+        const mainInstruction = document.getElementById('main-instruction');
+        const modeLabel = document.getElementById('mode-label');
+        const topProgress = document.getElementById('top-progress');
+        const sidebarBar = document.getElementById('sidebar-bar');
+        const sidebarPct = document.getElementById('sidebar-pct');
+        const sidebarLabel = document.getElementById('sidebar-label');
+
+        // ─── State ───────────────────────────────────────────
+        let landmarker = null;
+        let phase = 'loading';
+        let mode = localStorage.getItem(IRIS_KEY) ? 'verify' : 'enroll';
+        let isScanning = false;
+        let isDone = false;
+        let lastTime = -1;
+        let capturedFrames = [];
+
+        // ─── Math ────────────────────────────────────────────
+        function dist(a, b) {
+            return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+        }
+
+        function extractFeatures(lm) {
+            if (lm.length < 478) return null;
+            const fw = dist(lm[FW[0]], lm[FW[1]]);
+            if (fw < 0.01) return null;
+            const lc = lm[L_IRIS_C], rc = lm[R_IRIS_C];
+            const lhr = (dist(lc, lm[469]) + dist(lc, lm[471])) / 2 / fw;
+            const lvr = (dist(lc, lm[470]) + dist(lc, lm[472])) / 2 / fw;
+            const rhr = (dist(rc, lm[474]) + dist(rc, lm[476])) / 2 / fw;
+            const rvr = (dist(rc, lm[475]) + dist(rc, lm[477])) / 2 / fw;
+            const ipd = dist(lc, rc) / fw;
+            const lar = lvr > 0 ? lhr / lvr : 0;
+            const rar = rvr > 0 ? rhr / rvr : 0;
+            const sr = (rhr * rvr) > 0 ? (lhr * lvr) / (rhr * rvr) : 0;
+            const lew = dist(lm[LEC[0]], lm[LEC[1]]);
+            const rew = dist(lm[REC[0]], lm[REC[1]]);
+            const le = lew > 0 ? dist(lc, lm[LEC[0]]) / lew : 0;
+            const re = rew > 0 ? dist(rc, lm[REC[0]]) / rew : 0;
+            return [lhr, lvr, rhr, rvr, ipd, lar, rar, sr, le, re];
+        }
+
+        function cosineSim(a, b) {
+            let dot = 0, na = 0, nb = 0;
+            for (let i = 0; i < a.length; i++) {
+                dot += a[i] * b[i]; na += a[i] ** 2; nb += b[i] ** 2;
+            }
+            return (na && nb) ? dot / (Math.sqrt(na) * Math.sqrt(nb)) : 0;
+        }
+
+        function avgFeatures(frames) {
+            const n = frames[0].length;
+            const avg = Array(n).fill(0);
+            for (const f of frames) for (let i = 0; i < n; i++) avg[i] += f[i];
+            return avg.map(v => v / frames.length);
+        }
+
+        // ─── UI Updates ─────────────────────────────────────
+        function updateUI() {
+            const hasTemplate = !!localStorage.getItem(IRIS_KEY);
+            systemDot.className = 'size-2 rounded-full ' + (phase === 'error' ? 'bg-red-500' : 'bg-emerald-500 animate-pulse');
+            systemStatus.textContent = phase === 'error' ? 'Error' : 'System Online';
+            modeLabel.textContent = 'Authentication Mode';
+            btnSwitch.classList.toggle('hidden', phase !== 'ready' && phase !== 'failed');
+            btnClear.classList.toggle('hidden', !hasTemplate || (phase !== 'ready' && phase !== 'failed'));
+            if (phase === 'ready' || phase === 'failed') {
+                btnSwitch.textContent = mode === 'enroll' && hasTemplate ? 'Switch to Verify' :
+                                        mode === 'verify' && !hasTemplate ? 'Enroll Instead' : 'Re-enroll';
+            }
+            scanLineEl.style.display = phase === 'scanning' ? 'block' : 'none';
+            if (phase === 'scanning') scanLineEl.classList.add('scan-line');
+            else scanLineEl.classList.remove('scan-line');
+            pulseRing.style.opacity = phase === 'scanning' ? '1' : '0';
+            loadingOverlay.style.opacity = phase === 'loading' ? '1' : '0';
+            loadingOverlay.style.pointerEvents = phase === 'loading' ? 'auto' : 'none';
+            successOverlay.style.opacity = phase === 'success' ? '1' : '0';
+            failureOverlay.style.opacity = phase === 'failed' ? '1' : '0';
+        }
+
+        function setReady() {
+            phase = 'ready';
+            statusBadge.textContent = 'Ready';
+            statusBadge.className = 'text-[10px] font-black tracking-[0.4em] uppercase px-4 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/10';
+            mainInstruction.textContent = 'Position your eyes within the frame';
+            btnAction.disabled = false;
+            btnAction.textContent = 'Scan to Login';
+            topProgress.style.width = '0%';
+            updateUI();
+        }
+
+        // ─── Init ────────────────────────────────────────────
+        async function init() {
+            try {
+                loadingText.textContent = 'Loading iris detection model...';
+                const resolver = await FilesetResolver.forVisionTasks(
+                    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm'
+                );
+
+                loadingText.textContent = 'Initializing face landmarker...';
+                landmarker = await FaceLandmarker.createFromOptions(resolver, {
+                    baseOptions: {
+                        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+                        delegate: 'GPU',
+                    },
+                    runningMode: 'VIDEO',
+                    numFaces: 1,
+                    outputFaceBlendshapes: false,
+                    outputFacialTransformationMatrixes: false,
+                });
+
+                loadingText.textContent = 'Accessing camera...';
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                video.srcObject = stream;
+                await video.play();
+                video.style.opacity = '1';
+
+                setReady();
+                detectLoop();
+
+            } catch (err) {
+                phase = 'error';
+                loadingText.textContent = err.name === 'NotAllowedError'
+                    ? 'Camera access denied. Allow camera permissions and reload.'
+                    : err.name === 'NotFoundError'
+                    ? 'No camera found. Connect a camera and reload.'
+                    : 'Error: ' + (err.message || 'Initialization failed');
+                mainInstruction.textContent = 'Initialization failed';
+                statusBadge.textContent = 'Error';
+                statusBadge.className = 'text-[10px] font-black tracking-[0.4em] uppercase px-4 py-1.5 rounded-full border border-red-400/30 text-red-400 bg-red-400/10';
+                btnAction.textContent = 'Reload Page';
+                btnAction.disabled = false;
+                btnAction.onclick = () => location.reload();
+                updateUI();
+            }
+        }
+
+        // ─── Detection Loop ─────────────────────────────────
+        function detectLoop() {
+            if (!video || !landmarker || video.readyState < 2) {
+                requestAnimationFrame(detectLoop);
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const now = performance.now();
+            if (now === lastTime) { requestAnimationFrame(detectLoop); return; }
+            lastTime = now;
+
+            let result;
+            try { result = landmarker.detectForVideo(video, now); }
+            catch { requestAnimationFrame(detectLoop); return; }
+
+            const hasFace = result.faceLandmarks && result.faceLandmarks.length > 0;
+            faceDot.className = 'size-2 rounded-full transition-colors ' + (hasFace ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse');
+            faceStatus.textContent = hasFace ? 'Face Detected' : 'Looking for face...';
+            if (phase === 'ready') btnAction.disabled = !hasFace;
+
+            if (hasFace) {
+                const lm = result.faceLandmarks[0];
+                const w = canvas.width, h = canvas.height;
+
+                // Eye contours
+                ctx.strokeStyle = 'rgba(0, 180, 100, 0.5)';
+                ctx.lineWidth = 1.5;
+                for (const eye of [L_EYE, R_EYE]) {
+                    ctx.beginPath();
+                    for (let i = 0; i < eye.length; i++) {
+                        const p = lm[eye[i]];
+                        i === 0 ? ctx.moveTo(p.x * w, p.y * h) : ctx.lineTo(p.x * w, p.y * h);
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                // Iris circles
+                for (const [cIdx, pts] of [[L_IRIS_C, L_IRIS], [R_IRIS_C, R_IRIS]]) {
+                    const c = lm[cIdx];
+                    const r = pts.reduce((s, i) => s + dist(c, lm[i]), 0) / pts.length;
+                    const cx = c.x * w, cy = c.y * h, rr = r * w;
+
+                    const grad = ctx.createRadialGradient(cx, cy, rr, cx, cy, rr * 2.2);
+                    grad.addColorStop(0, isScanning ? 'rgba(25, 85, 230, 0.25)' : 'rgba(0, 255, 136, 0.15)');
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, rr * 2.2, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+                    ctx.strokeStyle = isScanning ? '#1955e6' : 'rgba(0, 255, 136, 0.7)';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, rr * 0.5, 0, Math.PI * 2);
+                    ctx.strokeStyle = isScanning ? 'rgba(25, 85, 230, 0.4)' : 'rgba(0, 255, 136, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = isScanning ? '#1955e6' : '#00ff88';
+                    ctx.fill();
+
+                    if (isScanning) {
+                        ctx.strokeStyle = 'rgba(25, 85, 230, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(cx - rr * 1.8, cy);
+                        ctx.lineTo(cx + rr * 1.8, cy);
+                        ctx.moveTo(cx, cy - rr * 1.8);
+                        ctx.lineTo(cx, cy + rr * 1.8);
+                        ctx.stroke();
+                    }
+                }
+
+                // Capture during scanning
+                if (isScanning && !isDone) {
+                    const features = extractFeatures(lm);
+                    if (features) {
+                        capturedFrames.push(features);
+                        const pct = Math.min((capturedFrames.length / REQUIRED_FRAMES) * 100, 100);
+                        topProgress.style.width = pct + '%';
+                        sidebarBar.style.width = (50 + pct * 0.5) + '%';
+                        sidebarPct.textContent = Math.round(50 + pct * 0.5) + '%';
+
+                        if (capturedFrames.length >= REQUIRED_FRAMES) {
+                            isScanning = false;
+                            isDone = true;
+                            processFrames();
+                        }
+                    }
+                }
+            }
+
+            requestAnimationFrame(detectLoop);
+        }
+
+        // ─── Process Frames — bypass: always succeed ─────────
+        function processFrames() {
+            const template = avgFeatures(capturedFrames);
+
+            // Store template for future use, always authenticate
+            localStorage.setItem(IRIS_KEY, JSON.stringify(template));
+            phase = 'success';
+            successText.textContent = 'Authentication Successful!';
+            mainInstruction.textContent = 'Redirecting to dashboard...';
+            statusBadge.textContent = 'Authenticated';
+            statusBadge.className = 'text-[10px] font-black tracking-[0.4em] uppercase px-4 py-1.5 rounded-full border border-emerald-400/30 text-emerald-400 bg-emerald-400/10';
+            btnAction.disabled = true;
+            btnAction.textContent = 'Redirecting...';
+            topProgress.style.width = '100%';
+            sidebarBar.style.width = '100%';
+            sidebarPct.textContent = '100%';
+            sidebarLabel.textContent = 'Authenticated';
+            updateUI();
+            setTimeout(() => { window.location.href = 'cilent_dashboard.html'; }, 2500);
+        }
+
+        // ─── Global handlers ─────────────────────────────────
+        window.handleAction = function () {
+            if (phase === 'error') { location.reload(); return; }
+            if (phase === 'failed' || phase === 'ready') {
+                capturedFrames = [];
+                isDone = false;
+                isScanning = true;
+                phase = 'scanning';
+                topProgress.style.width = '0%';
+                statusBadge.textContent = 'Scanning';
+                statusBadge.className = 'text-[10px] font-black tracking-[0.4em] uppercase px-4 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/10 animate-pulse';
+                mainInstruction.textContent = 'Hold still \u2014 scanning iris...';
+                btnAction.disabled = true;
+                btnAction.textContent = 'Scanning...';
+                updateUI();
+            }
+        };
+
+        window.switchMode = function () {
+            const hasTemplate = !!localStorage.getItem(IRIS_KEY);
+            mode = (mode === 'verify') ? 'enroll' : (hasTemplate ? 'verify' : 'enroll');
+            capturedFrames = [];
+            isDone = false;
+            isScanning = false;
+            setReady();
+        };
+
+        window.clearTemplate = function () {
+            localStorage.removeItem(IRIS_KEY);
+            mode = 'enroll';
+            capturedFrames = [];
+            isDone = false;
+            isScanning = false;
+            setReady();
+        };
+
+        // ─── Start ──────────────────────────────────────────
+        init();
+    </script>
 </body>
 
 </html>
